@@ -108,6 +108,7 @@ stdattrs = [(u'http://www.w3.org/XML/1998/namespace', u'base'),
 class SAXDispatcher(ContentHandler):
 
   firstOccurrenceOnly = 0
+  groupEvents = 0
 
   def __init__(self, base, selfURIs, encoding):
     from root import root
@@ -134,6 +135,9 @@ class SAXDispatcher(ContentHandler):
 
   def setFirstOccurrenceOnly(self, firstOccurrenceOnly=1):
     self.firstOccurrenceOnly = firstOccurrenceOnly
+
+  def setGroupEvents(self, groupEvents=1):
+    self.groupEvents = groupEvents
 
   def startPrefixMapping(self, prefix, uri):
     for handler in iter(self.handler_stack[-1]):
@@ -295,6 +299,8 @@ class SAXDispatcher(ContentHandler):
         dup.params['msgcount'] = dup.params['msgcount'] + 1
         return
       event.params['msgcount'] = 1
+    if self.groupEvents:
+      dup = findDuplicate(self, event)
     try:
       line = self.locator.getLineNumber() + offset[0]
       backupline = self.lastKnownLine
@@ -306,6 +312,13 @@ class SAXDispatcher(ContentHandler):
     event.params['backupline'] = backupline
     event.params['column'] = column
     event.params['backupcolumn'] = backupcolumn
+    if self.groupEvents and dup:
+      if 'duplicates' in dup.params:
+        dup.params['duplicates'].append(event)
+      else:
+        dup.params['duplicates'] = []
+        dup.params['duplicates'].append(event)
+      return
     self.loggedEvents.append(event)
 
   def error(self, exception):
