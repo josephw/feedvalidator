@@ -46,7 +46,7 @@ for n, o in inspect.getmembers(feedvalidator.logging, inspect.isclass):
   if rcname in show:
     fn = os.path.join('docs', rcname, n + '.html')
     if not(isfile(os.path.join(BASE, fn))):
-      print fn
+      print(fn)
       areMissing=True
 
 if areMissing:
