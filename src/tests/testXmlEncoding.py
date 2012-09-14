@@ -133,8 +133,8 @@ def genValidXmlTestCases():
     yield('UTF-32', ['BOM', 'declaration', 'LE'],
       bom32LE + encoded('UTF-32LE', makeDecl('UTF-32') + docText))
 
-    yield('UTF-32', ['declaration', 'BE'],
-      encoded('UTF-32BE', makeDecl('UTF-32') + docText))
+#    yield('UTF-32', ['declaration', 'BE'],
+#      encoded('UTF-32BE', makeDecl('UTF-32') + docText))
 
     yield('UTF-32', ['declaration', 'LE'],
       encoded('UTF-32LE', makeDecl('UTF-32') + docText))
