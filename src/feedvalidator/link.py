@@ -111,7 +111,10 @@ class link(nonblank,xmlbase,iso639,nonhtml,nonNegativeInteger,rfc3339,nonblank):
       if self.rel == "self" and self.parent.name in ["feed","channel"]:
 
         # detect relative self values
-        from urlparse import urlparse
+        try:
+          from urllib.parse import urlparse, urljoin
+        except:
+          from urlparse import urlparse, urljoin
         from xml.dom import XML_NAMESPACE
         absolute = urlparse(self.href)[1]
         element = self
@@ -123,7 +126,6 @@ class link(nonblank,xmlbase,iso639,nonhtml,nonNegativeInteger,rfc3339,nonblank):
         if not absolute:
           self.log(RelativeSelf({"value":self.href}))
 
-        from urlparse import urljoin
         if urljoin(self.xmlBase,self.value) not in self.dispatcher.selfURIs:
           if urljoin(self.xmlBase,self.value).split('#')[0] != self.xmlBase.split('#')[0]:
             from .uri import Uri

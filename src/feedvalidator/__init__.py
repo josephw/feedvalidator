@@ -11,7 +11,15 @@ else:
   timeoutsocket.setDefaultSocketTimeout(10)
   Timeout = timeoutsocket.Timeout
 
-import urllib2
+try:
+  from urllib.request import Request, urlopen
+  from urllib.error import HTTPError, URLError
+  from http.client import BadStatusLine
+except:
+  from urllib2 import Request, urlopen
+  from urllib2 import HTTPError, URLError
+  from httplib import BadStatusLine
+
 from . import logging
 from .logging import *
 from xml.sax import SAXException
@@ -19,7 +27,6 @@ from xml.sax.xmlreader import InputSource
 import re
 from . import xmlEncoding
 from . import mediaTypes
-from httplib import BadStatusLine
 
 MAXDATALENGTH = 2000000
 
@@ -182,13 +189,13 @@ def validateString(aString, firstOccurrenceOnly=0, fallback=None, base=""):
 def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
   """validate RSS from URL, returns events list, or (events, rawdata) tuple"""
   loggedEvents = []
-  request = urllib2.Request(url)
+  request = Request(url)
   request.add_header("Accept-encoding", "gzip, deflate")
   request.add_header("User-Agent", "FeedValidator/1.3")
   usock = None
   try:
     try:
-      usock = urllib2.urlopen(request)
+      usock = urlopen(request)
       rawdata = usock.read(MAXDATALENGTH)
       if usock.read(1):
         raise ValidationFailure(logging.ValidatorLimit({'limit': 'feed length > ' + str(MAXDATALENGTH) + ' bytes'}))
@@ -210,7 +217,7 @@ def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
     except BadStatusLine as status:
       raise ValidationFailure(logging.HttpError({'status': status.__class__}))
 
-    except urllib2.HTTPError as status:
+    except HTTPError as status:
       rawdata = status.read()
       if len(rawdata) < 512 or 'content-encoding' in status.headers:
         loggedEvents.append(logging.HttpError({'status': status}))
@@ -224,7 +231,7 @@ def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
           usock = status
         else:
           raise ValidationFailure(logging.HttpError({'status': status}))
-    except urllib2.URLError as x:
+    except URLError as x:
       raise ValidationFailure(logging.HttpError({'status': x.reason}))
     except Timeout as x:
       raise ValidationFailure(logging.IOError({"message": 'Server timed out', "exception":x}))

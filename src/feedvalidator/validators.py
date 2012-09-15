@@ -102,7 +102,11 @@ class eater(validatorBase):
     # eat children
     self.push(self.__class__(), name, attrs)
 
-from HTMLParser import HTMLParser, HTMLParseError
+try:
+  from html.parser import HTMLParser, HTMLParseError
+except:
+  from HTMLParser import HTMLParser, HTMLParseError
+
 class HTMLValidator(HTMLParser):
   htmltags = [
     "a", "abbr", "acronym", "address", "applet", "area", "article", "aside",
@@ -707,7 +711,11 @@ class rfc822(text):
 #
 # Decode html entityrefs
 #
-from htmlentitydefs import name2codepoint
+try:
+  from html.entities import name2codepoint
+except:
+  from htmlentitydefs import name2codepoint
+
 def decodehtml(data):
   chunks=re.split('&#?(\w+);',data)
 

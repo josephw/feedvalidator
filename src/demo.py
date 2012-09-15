@@ -8,13 +8,18 @@ import feedvalidator
 import sys
 import os
 import urllib
-import urllib2
-import urlparse
+
+try:
+  from urllib.parse import urljoin
+  from urllib.request import pathname2url
+except:
+  from urlparse import urljoin
+  from urllib import pathname2url
 
 if __name__ == '__main__':
   # arg 1 is URL to validate
   link = sys.argv[1:] and sys.argv[1] or 'http://www.intertwingly.net/blog/index.atom'
-  link = urlparse.urljoin('file:' + urllib.pathname2url(os.getcwd()) + '/', link)
+  link = urljoin('file:' + pathname2url(os.getcwd()) + '/', link)
   try:
     link = link.decode('utf-8').encode('idna')
   except:
@@ -22,7 +27,7 @@ if __name__ == '__main__':
   print('Validating %s' % link)
 
   curdir = os.path.abspath(os.path.dirname(sys.argv[0]))
-  basedir = urlparse.urljoin('file:' + curdir, ".")
+  basedir = urljoin('file:' + curdir, ".")
 
   try:
     if link.startswith(basedir):

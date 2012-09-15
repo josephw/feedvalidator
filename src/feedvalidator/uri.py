@@ -7,8 +7,12 @@ __author__ = "Joseph Walton <http://www.kafsemo.org/>"
 __version__ = "$Revision$"
 __copyright__ = "Copyright (c) 2004, 2007 Joseph Walton"
 
-from urlparse import urljoin
-from urllib import quote, quote_plus, unquote, unquote_plus
+try:
+  from urllib.parse import urljoin
+  from urllib.parse import quote, quote_plus, unquote, unquote_plus
+except:
+  from urlparse import urljoin
+  from urllib import quote, quote_plus, unquote, unquote_plus
 
 from unicodedata import normalize
 from codecs import lookup
