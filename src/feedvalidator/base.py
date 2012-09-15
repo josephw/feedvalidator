@@ -7,6 +7,11 @@ from xml.sax.xmlreader import Locator
 from .logging import NonCanonicalURI, NotUTF8
 import re
 
+try:
+  from io import StringIO
+except:
+  from cStringIO import StringIO
+
 # references:
 # http://web.resource.org/rss/1.0/modules/standard.html
 # http://web.resource.org/rss/1.0/modules/proposed.html
@@ -204,8 +209,7 @@ class SAXDispatcher(ContentHandler):
 
   def resolveEntity(self, publicId, systemId):
     if not publicId and not systemId:
-      import cStringIO
-      return cStringIO.StringIO()
+      return StringIO()
 
     try:
       def log(exception):
@@ -231,13 +235,15 @@ class SAXDispatcher(ContentHandler):
       self.lastKnownLine = self.locator.getLineNumber()
       self.lastKnownColumn = self.locator.getColumnNumber()
       self.log(ContainsSystemEntity({}))
-    from StringIO import StringIO
     return StringIO()
 
   def skippedEntity(self, name):
     from .logging import ValidDoctype
     if [e for e in self.loggedEvents if e.__class__ == ValidDoctype]:
-      from htmlentitydefs import name2codepoint
+      try:
+        from html.entities import name2codepoint
+      except:
+        from htmlentitydefs import name2codepoint
       if name in name2codepoint: return
     from .logging import UndefinedNamedEntity
     self.log(UndefinedNamedEntity({'value':name}))
@@ -364,7 +370,10 @@ class validatorBase(ContentHandler):
       from .validators import rfc3987
       self.validate_attribute((u'http://www.w3.org/XML/1998/namespace',u'base'),
           rfc3987)
-      from urlparse import urljoin
+      try:
+        from urllib.parse import urljoin
+      except:
+        from urlparse import urljoin
       self.xmlBase = urljoin(parent.xmlBase, self.xmlBase)
     else:
       self.xmlBase = parent.xmlBase

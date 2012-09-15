@@ -31,7 +31,10 @@
 
 """
 """
-from urlparse import urljoin, urldefrag
+try:
+  from urllib.parse import urljoin, urldefrag
+except:
+  from urlparse import urljoin, urldefrag
 
 from xml.sax.saxutils import handler, quoteattr, escape
 from urllib import quote

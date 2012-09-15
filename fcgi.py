@@ -53,7 +53,10 @@ import sys
 import os
 import signal
 import struct
-import cStringIO as StringIO
+try:
+  import io as StringIO
+except:
+  import cStringIO as StringIO
 import select
 import socket
 import errno

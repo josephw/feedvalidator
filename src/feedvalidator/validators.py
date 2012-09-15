@@ -794,7 +794,6 @@ class nonhtml(text,safeHtmlMixin):#,absUrlMixin):
     # experimental RSS-Profile support
     elif self.htmlEntity_re.search(self.value):
       for value in self.htmlEntity_re.findall(self.value):
-        from htmlentitydefs import name2codepoint
         if value in name2codepoint or value == 'apos' or not value.isalpha():
           if not hasattr(self,'startline'): self.startline=self.line
           lines = self.dispatcher.rssCharData[self.startline-1:self.line]

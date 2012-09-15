@@ -15,10 +15,12 @@ try:
   from urllib.request import Request, urlopen
   from urllib.error import HTTPError, URLError
   from http.client import BadStatusLine
+  from urllib.parse import urljoin
 except:
   from urllib2 import Request, urlopen
   from urllib2 import HTTPError, URLError
   from httplib import BadStatusLine
+  from urlparse import urljoin
 
 from . import logging
 from .logging import *
@@ -44,12 +46,16 @@ def sniffPossibleFeed(rawdata):
   lastline = rawdata.strip().split('\n')[-1].strip()
   return lastline in ['</rss>','</feed>','</rdf:RDF>', '</kml>']
 
+try:
+  from io import StringIO
+except:
+  from cStringIO import StringIO
+
 def _validate(aString, firstOccurrenceOnly, loggedEvents, base, encoding, selfURIs=None, mediaType=None):
   """validate RSS from string, returns validator object"""
   from xml.sax import make_parser, handler
   from .base import SAXDispatcher
   from exceptions import UnicodeError
-  from cStringIO import StringIO
 
   if re.match("^\s+<\?xml",aString) and re.search("<generator.*wordpress.*</generator>",aString):
     lt = aString.find('<'); gt = aString.find('>')
@@ -100,7 +106,6 @@ def _validate(aString, firstOccurrenceOnly, loggedEvents, base, encoding, selfUR
 
   def xmlvalidate(log):
     import libxml2
-    from StringIO import StringIO
     from random import random
 
     prefix="...%s..." % str(random()).replace('0.','')
@@ -202,10 +207,16 @@ def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
 
       # check for temporary redirects
       if usock.geturl() != request.get_full_url():
-        from urlparse import urlsplit
+        try:
+          from urllib.parse import urlsplit
+        except:
+          from urlparse import urlsplit
         (scheme, netloc, path, query, fragment) = urlsplit(url)
         if scheme == 'http':
-          from httplib import HTTPConnection
+          try:
+            from http.client import HTTPConnection
+          except:
+            from httplib import HTTPConnection
           requestUri = (path or '/') + (query and '?' + query)
 
           conn=HTTPConnection(netloc)
@@ -243,7 +254,7 @@ def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
       loggedEvents.append(Uncompressed({}))
 
     if usock.headers.get('content-encoding', None) == 'gzip':
-      import gzip, StringIO
+      import gzip
       try:
         rawdata = gzip.GzipFile(fileobj=StringIO.StringIO(rawdata)).read()
       except:
@@ -300,10 +311,8 @@ def validateURL(url, firstOccurrenceOnly=1, wantRawData=0):
 
     # Get baseURI from content-location and/or redirect information
     if usock.headers.get('content-location', None):
-      from urlparse import urljoin
       baseURI=urljoin(baseURI,usock.headers.get('content-location', ""))
     elif usock.headers.get('location', None):
-      from urlparse import urljoin
       baseURI=urljoin(baseURI,usock.headers.get('location', ""))
 
     if not baseURI in selfURIs: selfURIs.append(baseURI)
